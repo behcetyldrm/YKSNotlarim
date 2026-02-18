@@ -20,7 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
 import com.behcetemre.yksnotlarim.ui.theme.YKSNotlarımTheme
+import com.behcetemre.yksnotlarim.view.HomeScreen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -30,12 +32,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             YKSNotlarımTheme {
+                val navController = rememberNavController()
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = { TopAppBar() }
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
-
+                        HomeScreen(navController)
                     }
                 }
             }
