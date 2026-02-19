@@ -52,29 +52,45 @@ import com.behcetemre.yksnotlarim.util.Lessons
 
 enum class ExamType { TYT, AYT }
 
+enum class LessonType(val examType: ExamType) {
+    // TYT
+    TYT_TURKCE(ExamType.TYT),
+    TYT_SOSYAL(ExamType.TYT),
+    TYT_MATEMATIK(ExamType.TYT),
+    TYT_FIZIK(ExamType.TYT),
+    TYT_BIYOLOJI(ExamType.TYT),
+    TYT_KIMYA(ExamType.TYT),
+
+    // AYT
+    AYT_MATEMATIK(ExamType.AYT),
+    AYT_FIZIK(ExamType.AYT),
+    AYT_BIYOLOJI(ExamType.AYT),
+    AYT_KIMYA(ExamType.AYT)
+}
+
 @Composable
 fun HomeScreen(navController: NavController) {
-    var selected by remember { mutableStateOf(ExamType.TYT) }
+    var selectedTab by remember { mutableStateOf(ExamType.TYT) }
 
     val lessonsList = remember {
         listOf(
             // TYT Dersleri
-            Lessons("TYT Türkçe", Icons.Default.HistoryEdu, 0, ExamType.TYT, Color(0xFFA855F7), Color(0xFFEC4899)),
-            Lessons("TYT Sosyal", Icons.Default.Public, 0, ExamType.TYT, Color(0xFF3B82F6), Color(0xFF06B6D4)),
-            Lessons("TYT Matematik", Icons.Default.Calculate, 0, ExamType.TYT, Color(0xFFF97316), Color(0xFFEF4444)),
-            Lessons("TYT Fizik", Icons.Default.Bolt, 0, ExamType.TYT, Color(0xFF22C55E), Color(0xFF10B981)),
-            Lessons("TYT Biyoloji", Icons.Default.Grass, 0, ExamType.TYT, Color(0xFF14B8A6), Color(0xFF0891B2)),
-            Lessons("TYT Kimya", Icons.Default.Science, 0, ExamType.TYT, Color(0xFF6366F1), Color(0xFFA855F7)),
+            Lessons("TYT Türkçe", Icons.Default.HistoryEdu, 0, LessonType.TYT_TURKCE, Color(0xFFA855F7), Color(0xFFEC4899)),
+            Lessons("TYT Sosyal", Icons.Default.Public, 0, LessonType.TYT_SOSYAL, Color(0xFF3B82F6), Color(0xFF06B6D4)),
+            Lessons("TYT Matematik", Icons.Default.Calculate, 0, LessonType.TYT_MATEMATIK, Color(0xFFF97316), Color(0xFFEF4444)),
+            Lessons("TYT Fizik", Icons.Default.Bolt, 0, LessonType.TYT_FIZIK, Color(0xFF22C55E), Color(0xFF10B981)),
+            Lessons("TYT Biyoloji", Icons.Default.Grass, 0, LessonType.TYT_BIYOLOJI, Color(0xFF14B8A6), Color(0xFF0891B2)),
+            Lessons("TYT Kimya", Icons.Default.Science, 0, LessonType.TYT_KIMYA, Color(0xFF6366F1), Color(0xFFA855F7)),
 
             // AYT Dersleri
-            Lessons("AYT Matematik", Icons.Default.AutoGraph, 0, ExamType.AYT, Color(0xFFF43F5E), Color(0xFFEA580C)),
-            Lessons("AYT Fizik", Icons.Default.Bolt, 0, ExamType.AYT, Color(0xFF3B82F6), Color(0xFF06B6D4)),
-            Lessons("AYT Biyoloji", Icons.Default.Grass, 0, ExamType.AYT, Color(0xFF10B981), Color(0xFF0D9488)),
-            Lessons("AYT Kimya", Icons.Default.Science, 0, ExamType.AYT, Color(0xFF8B5CF6), Color(0xFFD946EF))
+            Lessons("AYT Matematik", Icons.Default.AutoGraph, 0, LessonType.AYT_MATEMATIK, Color(0xFFF43F5E), Color(0xFFEA580C)),
+            Lessons("AYT Fizik", Icons.Default.Bolt, 0, LessonType.AYT_FIZIK, Color(0xFF84CC16), Color(0xFF16A34A)),
+            Lessons("AYT Biyoloji", Icons.Default.Grass, 0, LessonType.AYT_BIYOLOJI, Color(0xFF10B981), Color(0xFF0D9488)),
+            Lessons("AYT Kimya", Icons.Default.Science, 0, LessonType.AYT_KIMYA, Color(0xFF8B5CF6), Color(0xFFD946EF))
         )
     }
 
-    val filteredLessons = lessonsList.filter { it.type == selected }
+    val filteredLessons = lessonsList.filter { it.type.examType == selectedTab }
 
     Column(
         modifier = Modifier
@@ -84,8 +100,8 @@ fun HomeScreen(navController: NavController) {
     ) {
         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
             TytAytSwitch(
-                selected = selected,
-                onSelectedChange = { selected = it }
+                selected = selectedTab,
+                onSelectedChange = { selectedTab = it }
             )
         }
 
