@@ -7,7 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.behcetemre.yksnotlarim.model.NoteModel
-import com.behcetemre.yksnotlarim.view.LessonType
+import com.behcetemre.yksnotlarim.util.LessonType
 import kotlinx.coroutines.flow.Flow
 
 @Dao

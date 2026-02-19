@@ -2,7 +2,7 @@ package com.behcetemre.yksnotlarim.repo
 
 import com.behcetemre.yksnotlarim.database.AppDao
 import com.behcetemre.yksnotlarim.model.NoteModel
-import com.behcetemre.yksnotlarim.view.LessonType
+import com.behcetemre.yksnotlarim.util.LessonType
 import javax.inject.Inject
 
 class AppRepository @Inject constructor(private val dao: AppDao) {

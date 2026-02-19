@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.behcetemre.yksnotlarim.ui.theme.YKSNotlarımTheme
 import com.behcetemre.yksnotlarim.util.Screens
@@ -43,11 +44,16 @@ class MainActivity : ComponentActivity() {
         setContent {
             YKSNotlarımTheme {
                 val navController = rememberNavController()
+                val navBackStackEntry = navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry.value?.destination?.route
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = { TopAppBar() },
-                    floatingActionButton = { FloatingButton(navController) }
+                    floatingActionButton = {
+                        if (currentRoute != Screens.AddNoteScreen.route)
+                            FloatingButton(navController)
+                    }
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
                         NavHost(navController = navController, startDestination = Screens.HomeScreen.route){

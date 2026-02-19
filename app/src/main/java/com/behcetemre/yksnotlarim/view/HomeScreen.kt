@@ -50,26 +50,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.behcetemre.yksnotlarim.util.ExamType
+import com.behcetemre.yksnotlarim.util.LessonType
 import com.behcetemre.yksnotlarim.util.Lessons
 import com.behcetemre.yksnotlarim.viewmodel.HomeViewModel
-
-enum class ExamType { TYT, AYT }
-
-enum class LessonType(val examType: ExamType) {
-    // TYT
-    TYT_TURKCE(ExamType.TYT),
-    TYT_SOSYAL(ExamType.TYT),
-    TYT_MATEMATIK(ExamType.TYT),
-    TYT_FIZIK(ExamType.TYT),
-    TYT_BIYOLOJI(ExamType.TYT),
-    TYT_KIMYA(ExamType.TYT),
-
-    // AYT
-    AYT_MATEMATIK(ExamType.AYT),
-    AYT_FIZIK(ExamType.AYT),
-    AYT_BIYOLOJI(ExamType.AYT),
-    AYT_KIMYA(ExamType.AYT)
-}
 
 @Composable
 fun HomeScreen(
@@ -80,7 +64,6 @@ fun HomeScreen(
 
     val lessonsList = remember {
         listOf(
-            // TYT Dersleri
             Lessons("TYT Türkçe", Icons.Default.HistoryEdu, LessonType.TYT_TURKCE, Color(0xFFA855F7), Color(0xFFEC4899)),
             Lessons("TYT Sosyal", Icons.Default.Public, LessonType.TYT_SOSYAL, Color(0xFF3B82F6), Color(0xFF06B6D4)),
             Lessons("TYT Matematik", Icons.Default.Calculate, LessonType.TYT_MATEMATIK, Color(0xFFF97316), Color(0xFFEF4444)),
@@ -88,7 +71,6 @@ fun HomeScreen(
             Lessons("TYT Biyoloji", Icons.Default.Grass, LessonType.TYT_BIYOLOJI, Color(0xFF14B8A6), Color(0xFF0891B2)),
             Lessons("TYT Kimya", Icons.Default.Science, LessonType.TYT_KIMYA, Color(0xFF6366F1), Color(0xFFA855F7)),
 
-            // AYT Dersleri
             Lessons("AYT Matematik", Icons.Default.AutoGraph, LessonType.AYT_MATEMATIK, Color(0xFFF43F5E), Color(0xFFEA580C)),
             Lessons("AYT Fizik", Icons.Default.Bolt, LessonType.AYT_FIZIK, Color(0xFF84CC16), Color(0xFF16A34A)),
             Lessons("AYT Biyoloji", Icons.Default.Grass, LessonType.AYT_BIYOLOJI, Color(0xFF10B981), Color(0xFF0D9488)),
@@ -129,9 +111,9 @@ fun HomeScreen(
 }
 
 @Composable
-fun LessonCard(lesson: Lessons, noteCount: Int, navController: NavController) {
+fun LessonCard(lesson: Lessons, noteCount: Int, modifier: Modifier = Modifier, navController: NavController) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(160.dp)
             .clip(RoundedCornerShape(24.dp))

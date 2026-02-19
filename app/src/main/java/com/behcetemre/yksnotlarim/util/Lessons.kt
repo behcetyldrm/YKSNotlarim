@@ -2,7 +2,6 @@ package com.behcetemre.yksnotlarim.util
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.behcetemre.yksnotlarim.view.LessonType
 
 data class Lessons(
     val name: String,

@@ -2,7 +2,7 @@ package com.behcetemre.yksnotlarim.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.behcetemre.yksnotlarim.view.LessonType
+import com.behcetemre.yksnotlarim.util.LessonType
 
 @Entity
 data class NoteModel(

@@ -3,7 +3,7 @@ package com.behcetemre.yksnotlarim.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.behcetemre.yksnotlarim.repo.AppRepository
-import com.behcetemre.yksnotlarim.view.LessonType
+import com.behcetemre.yksnotlarim.util.LessonType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
