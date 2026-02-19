@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,18 +14,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,8 +51,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.behcetemre.yksnotlarim.R
 import com.behcetemre.yksnotlarim.model.NoteModel
+import com.behcetemre.yksnotlarim.util.ExamType
 import com.behcetemre.yksnotlarim.util.LessonType
+import com.behcetemre.yksnotlarim.util.Lessons
 import com.behcetemre.yksnotlarim.viewmodel.AddNoteViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddNoteScreen(
@@ -59,7 +72,9 @@ fun AddNoteScreen(
 
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(12.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         item {
@@ -166,6 +181,14 @@ fun AddNoteScreen(
             }
         }
     }
+
+    if (showBottomSheet){
+        LessonPicker(
+            selectedLesson = selectedLesson,
+            onDismiss = { showBottomSheet = false },
+            onLessonSelected = { selectedLesson = it; showBottomSheet = false }
+        )
+    }
 }
 
 @Composable
@@ -193,4 +216,120 @@ fun SpecialTextField(
             unfocusedIndicatorColor = Color.Transparent
         )
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LessonPicker(
+    selectedLesson: LessonType,
+    onDismiss: () -> Unit,
+    onLessonSelected: (LessonType) -> Unit
+) {
+
+    var selectLesson by remember { mutableStateOf(selectedLesson) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+
+    val allLessons = remember { Lessons.allLessons }
+    val tytLessons = allLessons.filter { it.type.examType == ExamType.TYT }
+    val aytLessons = allLessons.filter { it.type.examType == ExamType.AYT }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(12.dp)
+        ) {
+            //TYT
+            Text(
+                text = "TYT Dersleri",
+                color = Color.Black,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(Modifier.height(6.dp))
+            tytLessons.forEach { lesson ->
+                RadioButtonItem(
+                    lessonName = lesson.name,
+                    selected = selectLesson == lesson.type
+                ) {
+                    selectLesson = lesson.type
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+            //AYT
+            Text(
+                text = "AYT Dersleri",
+                color = Color.Black,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(Modifier.height(6.dp))
+            aytLessons.forEach { lesson ->
+                RadioButtonItem(
+                    lessonName = lesson.name,
+                    selected = selectLesson == lesson.type
+                ) {
+                    selectLesson = lesson.type
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+            contentAlignment = Alignment.CenterEnd
+        ){
+            TextButton(
+                onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                        onLessonSelected(selectLesson)
+                    }
+                },
+                colors = ButtonDefaults.textButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color(0xFFF44336)
+                )
+            ) {
+                Text(
+                    text = "Tamam",
+                    fontSize = 18.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun RadioButtonItem(
+    lessonName: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable (
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ){ onClick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = onClick,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = Color(0xFFF44336)
+            ),
+            interactionSource = remember { MutableInteractionSource() }
+        )
+        Text(
+            text = lessonName,
+            modifier = Modifier.padding(start = 2.dp)
+        )
+    }
 }
