@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,8 +48,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.behcetemre.yksnotlarim.util.Lessons
+import com.behcetemre.yksnotlarim.viewmodel.HomeViewModel
 
 enum class ExamType { TYT, AYT }
 
@@ -69,24 +72,27 @@ enum class LessonType(val examType: ExamType) {
 }
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    navController: NavController,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
     var selectedTab by remember { mutableStateOf(ExamType.TYT) }
 
     val lessonsList = remember {
         listOf(
             // TYT Dersleri
-            Lessons("TYT Türkçe", Icons.Default.HistoryEdu, 0, LessonType.TYT_TURKCE, Color(0xFFA855F7), Color(0xFFEC4899)),
-            Lessons("TYT Sosyal", Icons.Default.Public, 0, LessonType.TYT_SOSYAL, Color(0xFF3B82F6), Color(0xFF06B6D4)),
-            Lessons("TYT Matematik", Icons.Default.Calculate, 0, LessonType.TYT_MATEMATIK, Color(0xFFF97316), Color(0xFFEF4444)),
-            Lessons("TYT Fizik", Icons.Default.Bolt, 0, LessonType.TYT_FIZIK, Color(0xFF22C55E), Color(0xFF10B981)),
-            Lessons("TYT Biyoloji", Icons.Default.Grass, 0, LessonType.TYT_BIYOLOJI, Color(0xFF14B8A6), Color(0xFF0891B2)),
-            Lessons("TYT Kimya", Icons.Default.Science, 0, LessonType.TYT_KIMYA, Color(0xFF6366F1), Color(0xFFA855F7)),
+            Lessons("TYT Türkçe", Icons.Default.HistoryEdu, LessonType.TYT_TURKCE, Color(0xFFA855F7), Color(0xFFEC4899)),
+            Lessons("TYT Sosyal", Icons.Default.Public, LessonType.TYT_SOSYAL, Color(0xFF3B82F6), Color(0xFF06B6D4)),
+            Lessons("TYT Matematik", Icons.Default.Calculate, LessonType.TYT_MATEMATIK, Color(0xFFF97316), Color(0xFFEF4444)),
+            Lessons("TYT Fizik", Icons.Default.Bolt, LessonType.TYT_FIZIK, Color(0xFF22C55E), Color(0xFF10B981)),
+            Lessons("TYT Biyoloji", Icons.Default.Grass, LessonType.TYT_BIYOLOJI, Color(0xFF14B8A6), Color(0xFF0891B2)),
+            Lessons("TYT Kimya", Icons.Default.Science, LessonType.TYT_KIMYA, Color(0xFF6366F1), Color(0xFFA855F7)),
 
             // AYT Dersleri
-            Lessons("AYT Matematik", Icons.Default.AutoGraph, 0, LessonType.AYT_MATEMATIK, Color(0xFFF43F5E), Color(0xFFEA580C)),
-            Lessons("AYT Fizik", Icons.Default.Bolt, 0, LessonType.AYT_FIZIK, Color(0xFF84CC16), Color(0xFF16A34A)),
-            Lessons("AYT Biyoloji", Icons.Default.Grass, 0, LessonType.AYT_BIYOLOJI, Color(0xFF10B981), Color(0xFF0D9488)),
-            Lessons("AYT Kimya", Icons.Default.Science, 0, LessonType.AYT_KIMYA, Color(0xFF8B5CF6), Color(0xFFD946EF))
+            Lessons("AYT Matematik", Icons.Default.AutoGraph, LessonType.AYT_MATEMATIK, Color(0xFFF43F5E), Color(0xFFEA580C)),
+            Lessons("AYT Fizik", Icons.Default.Bolt, LessonType.AYT_FIZIK, Color(0xFF84CC16), Color(0xFF16A34A)),
+            Lessons("AYT Biyoloji", Icons.Default.Grass, LessonType.AYT_BIYOLOJI, Color(0xFF10B981), Color(0xFF0D9488)),
+            Lessons("AYT Kimya", Icons.Default.Science, LessonType.AYT_KIMYA, Color(0xFF8B5CF6), Color(0xFFD946EF))
         )
     }
 
@@ -115,16 +121,17 @@ fun HomeScreen(navController: NavController) {
             modifier = Modifier.fillMaxSize()
         ) {
             items(filteredLessons) { lesson ->
-                LessonCard(lesson = lesson, navController = navController)
+                val noteCount by viewModel.getNoteCountFromType(lesson.type).collectAsState()
+                LessonCard(lesson = lesson, noteCount = noteCount, navController = navController)
             }
         }
     }
 }
 
 @Composable
-fun LessonCard(lesson: Lessons, modifier: Modifier = Modifier, navController: NavController) {
+fun LessonCard(lesson: Lessons, noteCount: Int, navController: NavController) {
     Box(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .height(160.dp)
             .clip(RoundedCornerShape(24.dp))
@@ -168,7 +175,7 @@ fun LessonCard(lesson: Lessons, modifier: Modifier = Modifier, navController: Na
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "${lesson.noteCount} Not",
+                        text = "$noteCount Not",
                         color = Color.White,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold

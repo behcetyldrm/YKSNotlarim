@@ -7,9 +7,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -20,8 +25,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.behcetemre.yksnotlarim.ui.theme.YKSNotlarımTheme
+import com.behcetemre.yksnotlarim.util.Screens
+import com.behcetemre.yksnotlarim.view.AddNoteScreen
 import com.behcetemre.yksnotlarim.view.HomeScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -36,10 +46,24 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    topBar = { TopAppBar() }
+                    topBar = { TopAppBar() },
+                    floatingActionButton = { FloatingButton(navController) }
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        HomeScreen(navController)
+                        NavHost(navController = navController, startDestination = Screens.HomeScreen.route){
+
+                            composable(Screens.HomeScreen.route){
+                                HomeScreen(navController)
+                            }
+
+                            composable(Screens.AddNoteScreen.route){
+                                AddNoteScreen(navController)
+                            }
+
+                            composable(Screens.LessonScreen.route){
+
+                            }
+                        }
                     }
                 }
             }
@@ -63,4 +87,21 @@ fun TopAppBar() {
         ),
         modifier = Modifier.clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
     )
+}
+
+@Composable
+fun FloatingButton(navController: NavController) {
+    FloatingActionButton(
+        onClick = {
+            navController.navigate(Screens.AddNoteScreen.route)
+        },
+        containerColor = Color(0xFFF44336),
+        contentColor = Color.White,
+        shape = CircleShape
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = "Add Note"
+        )
+    }
 }

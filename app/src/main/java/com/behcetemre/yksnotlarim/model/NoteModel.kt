@@ -11,5 +11,5 @@ data class NoteModel(
     val title: String,
     val content: String,
     val type: LessonType,
-    val imageUri: String? = null,
+    val imageUri: String? = null
 )
