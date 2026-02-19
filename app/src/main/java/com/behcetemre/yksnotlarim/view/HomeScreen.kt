@@ -22,23 +22,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoGraph
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.Grass
-import androidx.compose.material.icons.filled.HistoryEdu
-import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Science
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,20 +44,21 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.behcetemre.yksnotlarim.util.ExamType
-import com.behcetemre.yksnotlarim.util.LessonType
 import com.behcetemre.yksnotlarim.util.Lessons
+import com.behcetemre.yksnotlarim.util.Screens
 import com.behcetemre.yksnotlarim.viewmodel.HomeViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
     navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    var selectedTab by remember { mutableStateOf(ExamType.TYT) }
-
     val lessonsList = remember { Lessons.allLessons }
-
-    val filteredLessons = lessonsList.filter { it.type.examType == selectedTab }
+    val scope = rememberCoroutineScope()
+    
+    val pagerState = rememberPagerState(pageCount = { 2 })
+    val selectedTab = if (pagerState.currentPage == 0) ExamType.TYT else ExamType.AYT
 
     Column(
         modifier = Modifier
@@ -75,22 +69,35 @@ fun HomeScreen(
         Box(modifier = Modifier.padding(horizontal = 16.dp)) {
             TytAytSwitch(
                 selected = selectedTab,
-                onSelectedChange = { selectedTab = it }
+                onSelectedChange = { type ->
+                    scope.launch {
+                        pagerState.animateScrollToPage(if (type == ExamType.TYT) 0 else 1)
+                    }
+                }
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(filteredLessons) { lesson ->
-                val noteCount by viewModel.getNoteCountFromType(lesson.type).collectAsState()
-                LessonCard(lesson = lesson, noteCount = noteCount, navController = navController)
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+            beyondViewportPageCount = 1
+        ) { page ->
+            val currentExamType = if (page == 0) ExamType.TYT else ExamType.AYT
+            val filteredLessons = lessonsList.filter { it.type.examType == currentExamType }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(filteredLessons) { lesson ->
+                    val noteCount by viewModel.getNoteCountFromType(lesson.type).collectAsState()
+                    LessonCard(lesson = lesson, noteCount = noteCount, navController = navController)
+                }
             }
         }
     }
@@ -108,7 +115,9 @@ fun LessonCard(lesson: Lessons, noteCount: Int, modifier: Modifier = Modifier, n
                     colors = listOf(lesson.backgroundColor1, lesson.backgroundColor2)
                 )
             )
-            .clickable { /* Navigasyon */ }
+            .clickable {
+                navController.navigate(Screens.NoteListScreen.routeWithArgs(lesson.type.name))
+            }
     ) {
         Column(
             modifier = Modifier
