@@ -1,9 +1,7 @@
 package com.behcetemre.yksnotlarim.view
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,10 +42,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.behcetemre.yksnotlarim.model.NoteModel
@@ -61,7 +57,6 @@ fun NoteListScreen(
     lesson: String,
     viewModel: NoteListViewModel = hiltViewModel()
 ) {
-
     LaunchedEffect(lesson) {
         val type = LessonType.valueOf(lesson)
         viewModel.setType(type)
@@ -78,9 +73,9 @@ fun NoteListScreen(
     var contentValue by remember { mutableStateOf(TextFieldValue("")) }
 
     LaunchedEffect(selectedNote) {
-        if (selectedNote != null) {
-            title = selectedNote!!.title
-            contentValue = TextFieldValue(selectedNote!!.content, TextRange(selectedNote!!.content.length))
+        selectedNote?.let {
+            title = it.title
+            contentValue = TextFieldValue(it.content, selection = TextRange(it.content.length))
         }
     }
 
@@ -107,109 +102,96 @@ fun NoteListScreen(
 
     if (showBottomSheet) {
         ModalBottomSheet(
-            onDismissRequest = {
-                onSaveAndDismiss()
-            },
+            onDismissRequest = { onSaveAndDismiss() },
             sheetState = sheetState,
             containerColor = MaterialTheme.colorScheme.surface,
-            dragHandle = null // Daha temiz bir görünüm için drag handle kaldırıldı
+            dragHandle = null
         ) {
-            selectedNote?.let { note ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            onSaveAndDismiss()
+                        }
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kaydet ve Geri")
+                    }
+
+                    IconButton(onClick = {
+                        val currentText = contentValue.text
+                        val selection = contentValue.selection
+                        val cursorPosition = selection.start
+                        
+                        // Akıllı madde ekleme: Eğer satır başındaysak \n ekleme
+                        val needsNewLine = cursorPosition > 0 && currentText[cursorPosition - 1] != '\n'
+                        val bullet = if (needsNewLine) "\n• " else "• "
+                        
+                        val newText = StringBuilder(currentText).insert(cursorPosition, bullet).toString()
+                        
+                        contentValue = TextFieldValue(
+                            text = newText,
+                            selection = TextRange(cursorPosition + bullet.length)
+                        )
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.FormatListBulleted, contentDescription = "Madde Ekle")
+                    }
+                }
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 32.dp)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp)
                 ) {
-                    // Üst Bar
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = {
-                            scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                onSaveAndDismiss()
-                            }
-                        }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kaydet ve Geri")
-                        }
-
-                        IconButton(onClick = {
-                            val currentText = contentValue.text
-                            val cursorPosition = contentValue.selection.start
-                            val bullet = "\n• "
-                            val newText = StringBuilder(currentText).insert(cursorPosition, bullet).toString()
-                            
-                            contentValue = TextFieldValue(
-                                text = newText,
-                                selection = TextRange(cursorPosition + bullet.length)
-                            )
-                        }) {
-                            Icon(Icons.AutoMirrored.Filled.FormatListBulleted, contentDescription = "Madde Ekle")
-                        }
-                    }
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 20.dp)
-                    ) {
-                        TextField(
-                            value = title,
-                            onValueChange = { title = it },
-                            placeholder = {
-                                Text(
-                                    "Başlık",
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    color = Color.Gray
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            textStyle = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
+                    TextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        placeholder = {
+                            Text("Başlık", style = MaterialTheme.typography.headlineSmall, color = Color.Gray)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
                         )
+                    )
 
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            thickness = 0.5.dp,
-                            color = MaterialTheme.colorScheme.outlineVariant
-                        )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        thickness = 0.5.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
 
-                        TextField(
-                            value = contentValue,
-                            onValueChange = { contentValue = it },
-                            placeholder = {
-                                Text(
-                                    "Notunuzu yazın...",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Color.Gray
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            textStyle = MaterialTheme.typography.bodyLarge,
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
+                    TextField(
+                        value = contentValue,
+                        onValueChange = { contentValue = it },
+                        placeholder = {
+                            Text("Notunuzu yazın...", style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
                         )
-                    }
-                }
-            } ?: run {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Not yüklenemedi")
+                    )
                 }
             }
         }

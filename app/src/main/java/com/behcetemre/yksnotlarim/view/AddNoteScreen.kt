@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -166,11 +167,18 @@ fun AddNoteScreen(
                 
                 IconButton(
                     onClick = {
-                        val bullet = "• "
-                        val newText = content.text.substring(0, content.selection.start) + bullet + content.text.substring(content.selection.end)
+                        val currentText = content.text
+                        val selection = content.selection
+                        val cursorPosition = selection.start
+                        
+                        val needsNewLine = cursorPosition > 0 && currentText[cursorPosition - 1] != '\n'
+                        val bullet = if (needsNewLine) "\n• " else "• "
+                        
+                        val newText = StringBuilder(currentText).insert(cursorPosition, bullet).toString()
+                        
                         content = TextFieldValue(
                             text = newText,
-                            selection = androidx.compose.ui.text.TextRange(content.selection.start + bullet.length)
+                            selection = TextRange(cursorPosition + bullet.length)
                         )
                     },
                     modifier = Modifier.size(32.dp)
