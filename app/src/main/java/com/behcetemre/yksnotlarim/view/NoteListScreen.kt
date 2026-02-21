@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -110,6 +111,7 @@ fun NoteListScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .fillMaxHeight(0.75f)
                     .padding(bottom = 32.dp)
             ) {
                 Row(

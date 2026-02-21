@@ -25,7 +25,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -40,6 +43,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.behcetemre.yksnotlarim.ui.theme.YKSNotlarımTheme
+import com.behcetemre.yksnotlarim.util.LessonType
 import com.behcetemre.yksnotlarim.util.Screens
 import com.behcetemre.yksnotlarim.view.AddNoteScreen
 import com.behcetemre.yksnotlarim.view.HomeScreen
@@ -56,10 +60,16 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val navBackStackEntry = navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry.value?.destination?.route
+                var selectedLesson by remember { mutableStateOf<LessonType?>(null) }
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    topBar = { TopAppBar(navController = navController, currentRoute = currentRoute) },
+                    topBar = { TopAppBar(
+                        navController = navController,
+                        currentRoute = currentRoute,
+                        selectedLesson = selectedLesson,
+                        onClick = { selectedLesson = null }
+                    ) },
                     floatingActionButton = {
                         if (currentRoute != Screens.AddNoteScreen.route)
                             FloatingButton(navController)
@@ -69,7 +79,9 @@ class MainActivity : ComponentActivity() {
                         NavHost(navController = navController, startDestination = Screens.HomeScreen.route){
 
                             composable(Screens.HomeScreen.route){
-                                HomeScreen(navController)
+                                HomeScreen(navController){
+                                    selectedLesson = it
+                                }
                             }
 
                             composable(Screens.AddNoteScreen.route){
@@ -94,14 +106,21 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopAppBar(currentRoute: String? = null, navController: NavController) {
+fun TopAppBar(
+    currentRoute: String? = null,
+    navController: NavController,
+    selectedLesson: LessonType?,
+    onClick: () -> Unit
+) {
 
+    val title = selectedLesson?.title ?: "YKS Notlarım"
     CenterAlignedTopAppBar(
-        title = { Text(
-            text = "YKS Notlarım",
-            color = Color.White,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.SemiBold
+        title = {
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.SemiBold
         ) },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color(0xFFF44336)
@@ -123,6 +142,7 @@ fun TopAppBar(currentRoute: String? = null, navController: NavController) {
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ){
+                            onClick()
                             navController.popBackStack()
                         }
                 )

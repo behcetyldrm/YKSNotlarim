@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.behcetemre.yksnotlarim.util.ExamType
+import com.behcetemre.yksnotlarim.util.LessonType
 import com.behcetemre.yksnotlarim.util.Lessons
 import com.behcetemre.yksnotlarim.util.Screens
 import com.behcetemre.yksnotlarim.viewmodel.HomeViewModel
@@ -52,7 +53,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    selectedLessonType: (LessonType) -> Unit
 ) {
     val lessonsList = remember { Lessons.allLessons }
     val scope = rememberCoroutineScope()
@@ -96,7 +98,12 @@ fun HomeScreen(
             ) {
                 items(filteredLessons) { lesson ->
                     val noteCount by viewModel.getNoteCountFromType(lesson.type).collectAsState()
-                    LessonCard(lesson = lesson, noteCount = noteCount, navController = navController)
+                    LessonCard(
+                        lesson = lesson,
+                        noteCount = noteCount,
+                        navController = navController,
+                        onClick = { selectedLessonType(it) }
+                    )
                 }
             }
         }
@@ -104,7 +111,13 @@ fun HomeScreen(
 }
 
 @Composable
-fun LessonCard(lesson: Lessons, noteCount: Int, modifier: Modifier = Modifier, navController: NavController) {
+fun LessonCard(
+    lesson: Lessons,
+    noteCount: Int,
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    onClick: (LessonType) -> Unit
+) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -117,6 +130,7 @@ fun LessonCard(lesson: Lessons, noteCount: Int, modifier: Modifier = Modifier, n
             )
             .clickable {
                 navController.navigate(Screens.NoteListScreen.routeWithArgs(lesson.type.name))
+                onClick(lesson.type)
             }
     ) {
         Column(
