@@ -1,6 +1,5 @@
 package com.behcetemre.yksnotlarim.view
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,18 +20,22 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -44,11 +48,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
@@ -56,7 +57,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.behcetemre.yksnotlarim.R
 import com.behcetemre.yksnotlarim.model.NoteModel
 import com.behcetemre.yksnotlarim.util.ExamType
 import com.behcetemre.yksnotlarim.util.LessonType
@@ -69,204 +69,194 @@ fun AddNoteScreen(
     navController: NavController,
     viewModel: AddNoteViewModel = hiltViewModel()
 ) {
-
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf(TextFieldValue("")) }
     var selectedLesson by remember { mutableStateOf(LessonType.AYT_BIYOLOJI) }
-
     var showBottomSheet by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
-
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-    ) {
-        item {
-            Text(
-                text = "Fotoğraf",
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(6.dp))
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
             ){
-                Image(
-                    painter = painterResource(R.drawable.fotograf_ekle),
-                    contentDescription = "Fotoğraf Ekle",
+                focusManager.clearFocus()
+            }
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            item { Spacer(Modifier.height(8.dp)) }
+
+            item {
+                Surface(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .height(200.dp),
-                    alignment = Alignment.Center,
-                    contentScale = ContentScale.Crop
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .clickable { /* görsel seçme daha sonra eklenecek */ },
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                ) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddPhotoAlternate,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "Görsel Ekle",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "(İsteğe bağlı)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Başlık Alanı
+            item {
+                TextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    placeholder = {
+                        Text(
+                            "Not Başlığı",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = Color.Gray
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
                 )
             }
-        }
-        item {
-            Text(
-                text = "Not Başlığı",
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(6.dp))
-            SpecialTextField(
-                value = title,
-                onValueChange = { title = it },
-                placeholder = "Süreklilik Kuralı, Mitoz Aşamaları..."
-            )
-        }
 
-        item {
-            Text(
-                text = "Ders Seçin",
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(6.dp))
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) {
+            // Ders Seçimi
+            item {
+                Card(
+                    onClick = {
                         focusManager.clearFocus()
                         showBottomSheet = true
                     },
-                shape = RoundedCornerShape(12.dp),
-                color = Color(0xffE1E2EC)
-            ) {
-                Text(
-                    text = selectedLesson.title,
-                    modifier = Modifier.padding(16.dp),
-                    color = Color.Black
-                )
-
-            }
-        }
-
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Not İçeriği",
-                    color = Color.Black,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                
-                IconButton(
-                    onClick = {
-                        val currentText = content.text
-                        val selection = content.selection
-                        val cursorPosition = selection.start
-                        
-                        val needsNewLine = cursorPosition > 0 && currentText[cursorPosition - 1] != '\n'
-                        val bullet = if (needsNewLine) "\n• " else "• "
-                        
-                        val newText = StringBuilder(currentText).insert(cursorPosition, bullet).toString()
-                        
-                        content = TextFieldValue(
-                            text = newText,
-                            selection = TextRange(cursorPosition + bullet.length)
-                        )
-                    },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.FormatListBulleted, contentDescription = "Madde Ekle", tint = Color.Black)
-                }
-            }
-            Spacer(Modifier.height(6.dp))
-            OutlinedTextField(
-                value = content,
-                onValueChange = { content = it },
-                placeholder = { Text(text = "Yazın...") },
-                singleLine = false,
-                modifier = Modifier.fillMaxWidth().height(150.dp),
-                shape = RoundedCornerShape(12.dp),
-                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
-                keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences
-                ),
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color(0xffE1E2EC),
-                    focusedContainerColor = Color(0xffE1E2EC),
-                    focusedIndicatorColor = Color(0xff101828),
-                    unfocusedIndicatorColor = Color.Transparent
-                )
-            )
-        }
-
-        item {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ){
-                Button(
-                    onClick = {
-                        val note = NoteModel(
-                            title = title,
-                            content = content.text,
-                            type = selectedLesson
-                        )
-                        viewModel.insertNote(note)
-                        navController.popBackStack()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFF44336),
-                        contentColor = Color.White
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
                     )
                 ) {
-                    Text(text = "Kaydet")
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Ders Seçimi",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = selectedLesson.title,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        Icon(Icons.Default.ExpandMore, contentDescription = null)
+                    }
                 }
+            }
+
+            // İçerik ve Araçlar
+            item {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        IconButton(
+                            onClick = {
+                                val currentText = content.text
+                                val cursorPosition = content.selection.start
+                                val needsNewLine = cursorPosition > 0 && currentText[cursorPosition - 1] != '\n'
+                                val bullet = if (needsNewLine) "\n• " else "• "
+                                val newText = StringBuilder(currentText).insert(cursorPosition, bullet).toString()
+                                content = TextFieldValue(text = newText, selection = TextRange(cursorPosition + bullet.length))
+                            }
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.FormatListBulleted, contentDescription = "Madde Ekle")
+                        }
+                    }
+
+                    TextField(
+                        value = content,
+                        onValueChange = { content = it },
+                        placeholder = {
+                            Text("Notlarınızı buraya yazın...", style = MaterialTheme.typography.bodyLarge)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 200.dp),
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        )
+                    )
+                }
+            }
+        }
+
+        // Kaydet Butonu
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = {
+                    if (title.isNotBlank()) {
+                        val note = NoteModel(title = title, content = content.text, type = selectedLesson)
+                        viewModel.insertNote(note)
+                        navController.popBackStack()
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+                    .height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336))
+            ) {
+                Text("Notu Kaydet", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
 
-    if (showBottomSheet){
+    if (showBottomSheet) {
         LessonPicker(
             selectedLesson = selectedLesson,
             onDismiss = { showBottomSheet = false },
             onLessonSelected = { selectedLesson = it; showBottomSheet = false }
         )
     }
-}
-
-@Composable
-fun SpecialTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    singleLine: Boolean = true,
-) {
-
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = { Text(text = placeholder) },
-        singleLine = singleLine,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Words
-        ),
-        colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = Color(0xffE1E2EC),
-            focusedContainerColor = Color(0xffE1E2EC),
-            focusedIndicatorColor = Color(0xff101828),
-            unfocusedIndicatorColor = Color.Transparent
-        )
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -276,111 +266,65 @@ fun LessonPicker(
     onDismiss: () -> Unit,
     onLessonSelected: (LessonType) -> Unit
 ) {
-
     var selectLesson by remember { mutableStateOf(selectedLesson) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-
     val allLessons = remember { Lessons.allLessons }
-    val tytLessons = allLessons.filter { it.type.examType == ExamType.TYT }
-    val aytLessons = allLessons.filter { it.type.examType == ExamType.AYT }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState
-    ) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(12.dp)
+                .padding(20.dp)
         ) {
-            //TYT
-            Text(
-                text = "TYT Dersleri",
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(6.dp))
-            tytLessons.forEach { lesson ->
-                RadioButtonItem(
-                    lessonName = lesson.name,
-                    selected = selectLesson == lesson.type
-                ) {
-                    selectLesson = lesson.type
-                }
-            }
+            Text("Ders Seçin", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(16.dp))
 
-            Spacer(Modifier.height(12.dp))
-            //AYT
-            Text(
-                text = "AYT Dersleri",
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(Modifier.height(6.dp))
-            aytLessons.forEach { lesson ->
-                RadioButtonItem(
-                    lessonName = lesson.name,
-                    selected = selectLesson == lesson.type
-                ) {
-                    selectLesson = lesson.type
-                }
-            }
-        }
-
-        Box(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-            contentAlignment = Alignment.CenterEnd
-        ){
-            TextButton(
-                onClick = {
-                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                        onLessonSelected(selectLesson)
-                    }
-                },
-                colors = ButtonDefaults.textButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color(0xFFF44336)
-                )
-            ) {
+            listOf(ExamType.TYT, ExamType.AYT).forEach { examType ->
                 Text(
-                    text = "Tamam",
-                    fontSize = 18.sp
+                    text = if (examType == ExamType.TYT) "TYT Dersleri" else "AYT Dersleri",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
+                allLessons.filter { it.type.examType == examType }.forEach { lesson ->
+                    RadioButtonItem(lessonName = lesson.name, selected = selectLesson == lesson.type) {
+                        selectLesson = lesson.type
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
             }
+            
+            Button(
+                onClick = {
+                    scope.launch { sheetState.hide() }.invokeOnCompletion { onLessonSelected(selectLesson) }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336))
+            ) {
+                Text("Seçimi Tamamla")
+            }
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-fun RadioButtonItem(
-    lessonName: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
+fun RadioButtonItem(lessonName: String, selected: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable (
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ){ onClick() },
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
             selected = selected,
             onClick = onClick,
-            colors = RadioButtonDefaults.colors(
-                selectedColor = Color(0xFFF44336)
-            ),
-            interactionSource = remember { MutableInteractionSource() }
+            colors = RadioButtonDefaults.colors(selectedColor = Color(0xFFF44336))
         )
-        Text(
-            text = lessonName,
-            modifier = Modifier.padding(start = 2.dp)
-        )
+        Text(text = lessonName, style = MaterialTheme.typography.bodyLarge)
     }
 }
