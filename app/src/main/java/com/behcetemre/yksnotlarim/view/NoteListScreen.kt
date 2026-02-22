@@ -1,6 +1,7 @@
 package com.behcetemre.yksnotlarim.view
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,8 +19,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -40,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -94,7 +99,7 @@ fun NoteListScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         items(notes) { note ->
-            NoteCard(note) {
+            NoteCard(note, viewModel) {
                 viewModel.selectId(it)
                 showBottomSheet = true
             }
@@ -133,8 +138,7 @@ fun NoteListScreen(
                         val currentText = contentValue.text
                         val selection = contentValue.selection
                         val cursorPosition = selection.start
-                        
-                        // Akıllı madde ekleme: Eğer satır başındaysak \n ekleme
+
                         val needsNewLine = cursorPosition > 0 && currentText[cursorPosition - 1] != '\n'
                         val bullet = if (needsNewLine) "\n• " else "• "
                         
@@ -203,12 +207,22 @@ fun NoteListScreen(
 @Composable
 fun NoteCard(
     note: NoteModel,
+    viewModel: NoteListViewModel,
     onClick: (Int) -> Unit
 ) {
+    var expanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
+            .pointerInput(Unit){
+                detectTapGestures(
+                    onLongPress = {
+                        expanded = true
+                    }
+                )
+            }
             .clickable { onClick(note.id) },
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -237,6 +251,27 @@ fun NoteCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            shape = RoundedCornerShape(12.dp),
+            containerColor = Color.White
+        ) {
+            DropdownMenuItem(
+                text = { Text("Notu Sil", color = Color(0xFFF44336)) },
+                onClick = {
+                    viewModel.deleteNote(note)
+                    expanded = false
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = Color(0xFFF44336)
+                    )
+                }
             )
         }
     }

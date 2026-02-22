@@ -97,7 +97,7 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(filteredLessons) { lesson ->
-                    val noteCount by viewModel.getNoteCountFromType(lesson.type).collectAsState()
+                    val noteCount by viewModel.getNoteCountFromType(lesson.type).collectAsState(initial = 0)
                     LessonCard(
                         lesson = lesson,
                         noteCount = noteCount,
