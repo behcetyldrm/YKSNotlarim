@@ -117,7 +117,17 @@ fun TopAppBar(
     CenterAlignedTopAppBar(
         title = {
             Text(
-                text = if (currentRoute == Screens.AddNoteScreen.route) "Yeni Not" else title,
+                text = when (currentRoute) {
+                    Screens.AddNoteScreen.route -> {
+                        "Yeni Not"
+                    }
+                    Screens.HomeScreen.route -> {
+                        "YKS Notlarım"
+                    }
+                    else -> {
+                        title
+                    }
+                },
                 color = Color.White,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.SemiBold
