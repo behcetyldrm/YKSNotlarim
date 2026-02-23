@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id ("com.google.dagger.hilt.android")
-    //kotlin("plugin.serialization") version "2.3.10"
 }
 
 android {
@@ -68,7 +67,6 @@ dependencies {
 
     // Navigation & Serialization
     implementation("androidx.navigation:navigation-compose:2.9.7")
-    //implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
 
     // ViewModel & Lifecycle
     val lifecycle_version = "2.10.0"
@@ -79,7 +77,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
     // Dependency Injection (Hilt)
-    val hilt_version = "2.59.1"
+    val hilt_version = "2.59.2"
     implementation("com.google.dagger:hilt-android:$hilt_version")
     ksp("com.google.dagger:hilt-android-compiler:$hilt_version")
     implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
