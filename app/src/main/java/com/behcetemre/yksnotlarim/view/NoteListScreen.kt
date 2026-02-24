@@ -1,6 +1,7 @@
 package com.behcetemre.yksnotlarim.view
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -216,14 +217,10 @@ fun NoteCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .pointerInput(Unit){
-                detectTapGestures(
-                    onLongPress = {
-                        expanded = true
-                    }
-                )
-            }
-            .clickable { onClick(note.id) },
+            .combinedClickable( //long click ve click birlikte kullanmak için
+                onClick = { onClick(note.id) },
+                onLongClick = { expanded = true }
+            ),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
